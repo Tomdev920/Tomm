@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK (Simple Flet)
 
 on:
   push:
@@ -12,21 +12,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-    - name: Install dependencies
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.12.2
+
+    - name: Install Flet
       run: |
-        sudo apt update
-        sudo apt install -y python3-pip git zip unzip openjdk-17-jdk
-        pip install buildozer cython kivy
+        pip install --upgrade pip
+        pip install flet
 
     - name: Build APK
       run: |
-        buildozer android debug
+        flet build apk --verbose --no-input
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: apk
-        path: bin/*.apk
+        path: build/app/outputs/flutter-apk/
