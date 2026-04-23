@@ -1,35 +1,46 @@
-name: Build APK (Simple Flet)
+name: Build APK (Flet)
 
 on:
   push:
     branches:
       - main
-
+  pull_request:
   workflow_dispatch:
 
+env:
+  UV_PYTHON: "3.12"
+  PYTHONUTF8: "1"
+  FLET_CLI_NO_RICH_OUTPUT: "1"
+
 jobs:
-  build:
+  build-apk:
+    name: Build APK
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.12.2
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
 
-    - name: Install Flet
-      run: |
-        pip install --upgrade pip
-        pip install flet
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-    - name: Build APK
-      run: |
-        flet build apk --verbose --no-input
+      - name: Install project dependencies
+        run: |
+          uv sync --no-dev || uv pip install flet
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: apk
-        path: build/app/outputs/flutter-apk/
+      - name: Build APK
+        shell: bash
+        run: |
+          uv run flet build apk --yes --verbose
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-build
+          path: build/apk
+          if-no-files-found: error
