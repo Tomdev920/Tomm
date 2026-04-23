@@ -1,4 +1,4 @@
-name: Build APK (Flet Python)
+name: Build Simple Python APK
 
 on:
   push:
